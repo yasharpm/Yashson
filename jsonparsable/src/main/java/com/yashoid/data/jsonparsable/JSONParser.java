@@ -178,7 +178,7 @@ public class JSONParser {
 				
 				field.setAccessible(accessible);
 			}
-			else if (!object.onUnknownName(name, reader)) {
+			else if (!object.onUnknownName(name, reader, mContext)) {
 				reader.skipValue();
 			}
 		}

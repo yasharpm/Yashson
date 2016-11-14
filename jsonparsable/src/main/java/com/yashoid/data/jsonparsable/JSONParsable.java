@@ -17,7 +17,7 @@ public interface JSONParsable {
 	 * @param reader
 	 * @return true is you have consumed the value.
 	 */
-	boolean onUnknownName(String name, JsonReader reader) throws IOException;
+	boolean onUnknownName(String name, JsonReader reader, Context context) throws IOException;
 	
 	interface JsonParsableCreator<T extends JSONParsable> {
 		
