@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Yashar on 11/15/2017.<br/>
+ * Created by Yashar on 11/15/2017.
  *
  * <p>Use <code>Parse</code> methods to deserialize objects.</p>
  *
