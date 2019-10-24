@@ -3,9 +3,7 @@ package com.yashoid.yashson.fieldprovider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -82,7 +80,7 @@ public class FieldProvider {
         addFields(clazz.getSuperclass());
     }
 
-    public FieldWrapper getTargetedField(String fieldName, Class... subTypes) {
+    public FieldWrapper getTargetedField(String fieldName, ParsedType... subTypes) {
         ParsedField fieldNamePair = findCandidField(fieldName);
 
         if (fieldNamePair == null) {
@@ -93,53 +91,7 @@ public class FieldProvider {
 
         Type type = field.getGenericType();
 
-        if (!(type instanceof ParameterizedType)) {
-            return new FieldWrapper(field, null);
-        }
-
-        ParameterizedType fieldType = (ParameterizedType) type;
-
-        Type[] typeArguments = fieldType.getActualTypeArguments();
-        Class[] fieldSubTypes = new Class[typeArguments.length];
-
-        TypeVariable[] classTypeVariables = mClass.getTypeParameters();
-
-        for (int i = 0; i < fieldSubTypes.length; i++) {
-            Type subType = typeArguments[i];
-
-            if (subType instanceof Class) {
-                fieldSubTypes[i] = (Class) subType;
-
-                continue;
-            }
-
-            String typeVariableName = ((TypeVariable) subType).getName();
-            Class subTypeClass = findIndexOfTypeParameterForName(subTypes, classTypeVariables, typeVariableName);
-
-            if (subTypeClass != null) {
-                fieldSubTypes[i] = subTypeClass;
-
-                continue;
-            }
-
-            throw new RuntimeException("SubType Class is required for declared generic parameter '" + typeVariableName + "' in class '" + mClass.getName() + "'.");
-        }
-
-        return new FieldWrapper(field, null, fieldSubTypes);
-    }
-
-    private Class findIndexOfTypeParameterForName(Class[] subTypes, TypeVariable[] typeVariables, String parameterName) {
-        if (subTypes.length != typeVariables.length) {
-            throw new RuntimeException("Provided sub type classes for class '" + mClass.getName() + "' must be " + typeVariables.length + ".");
-        }
-
-        for (int i = 0; i <typeVariables.length; i++) {
-            if (typeVariables[i].getName().equals(parameterName)) {
-                return subTypes[i];
-            }
-        }
-
-        return null;
+        return new FieldWrapper(field, new ParsedType(type, mClass, subTypes));
     }
 
     private ParsedField findCandidField(String parsedName) {
@@ -234,7 +186,7 @@ public class FieldProvider {
         }
 
         private static String simplify(String s) {
-            return s.replaceAll("\\W", "").toLowerCase(Locale.US);
+            return s.replaceAll("[\\W,_]", "").toLowerCase(Locale.US);
         }
 
         private static boolean isCamel(String s) {

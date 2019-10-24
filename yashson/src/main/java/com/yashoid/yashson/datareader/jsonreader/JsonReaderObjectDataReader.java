@@ -11,7 +11,7 @@ import java.io.IOException;
  * Created by Yashar on 11/15/2017.
  */
 
-public class JsonReaderObjectDataReader extends ObjectDataReader {
+public class JsonReaderObjectDataReader implements ObjectDataReader {
 
     private JsonReader mReader;
 

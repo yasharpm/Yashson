@@ -9,6 +9,7 @@ import com.yashoid.yashson.datareader.DataReader;
 import com.yashoid.yashson.datareader.jsonreader.JsonReaderDataReader;
 import com.yashoid.yashson.fieldprovider.FieldProvider;
 import com.yashoid.yashson.fieldprovider.FieldWrapper;
+import com.yashoid.yashson.fieldprovider.ParsedType;
 import com.yashoid.yashson.serializer.ArraySerializer;
 import com.yashoid.yashson.serializer.BooleanSerializer;
 import com.yashoid.yashson.serializer.CollectionSerializer;
@@ -161,6 +162,16 @@ public class Yashson {
     }
 
     public<T> List<T> parseList(DataReader reader, Class<T> clazz, Class... subTypes) throws IOException {
+        ParsedType[] preparedSubTypes = new ParsedType[subTypes.length];
+
+        for (int i = 0; i < subTypes.length; i++) {
+            preparedSubTypes[i] = new ParsedType(subTypes[i], null);
+        }
+
+        return parseList(reader, clazz, preparedSubTypes);
+    }
+
+    public<T> List<T> parseList(DataReader reader, Class<T> clazz, ParsedType... subTypes) throws IOException {
         ArrayListValueParser valueParser = new ArrayListValueParser(getValueParser(clazz, subTypes));
 
         return (List<T>) valueParser.parseValue(reader);
@@ -179,6 +190,16 @@ public class Yashson {
     }
 
     public<T> T parse(DataReader dataReader, Class<T> clazz, Class... subTypes) throws IOException {
+        ParsedType[] preparedSubTypes = new ParsedType[subTypes.length];
+
+        for (int i = 0; i < subTypes.length; i++) {
+            preparedSubTypes[i] = new ParsedType(subTypes[i], null);
+        }
+
+        return parse(dataReader, clazz, preparedSubTypes);
+    }
+
+    public<T> T parse(DataReader dataReader, Class<T> clazz, ParsedType... subTypes) throws IOException {
         if (Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz)) {
             return (T) getValueParser(clazz, subTypes).parseValue(dataReader);
         }
@@ -306,7 +327,7 @@ public class Yashson {
         return getValueParser(fieldWrapper.getType(), fieldWrapper.getSubTypes());
     }
 
-    public ValueParser getValueParser(Class type, Class... subTypes) {
+    public ValueParser getValueParser(Class type, ParsedType... subTypes) {
         ValueParser valueParser = mValueParsers.get(type);
 
         if (valueParser != null) {
@@ -326,21 +347,21 @@ public class Yashson {
         }
 
         if (Collection.class.isAssignableFrom(type)) {
-            Class subType = subTypes[0];
+            ParsedType subType = subTypes[0];
 
-            ValueParser listParser = new ArrayListValueParser(getValueParser(subType));
+            ValueParser listParser = new ArrayListValueParser(getValueParser(subType.getType(), subType.getSubTypes()));
 
             return listParser;
         }
 
         if (Map.class.isAssignableFrom(type)) {
-            if (!subTypes[0].isAssignableFrom(String.class)) {
+            if (!subTypes[0].getType().isAssignableFrom(String.class)) {
                 throw new RuntimeException("Parsing instances of Map requires the key parameter to be defined as String.");
             }
 
-            Class subType = subTypes[1];
+            ParsedType subType = subTypes[1];
 
-            ValueParser mapParser = new HashMapValueParser(getValueParser(subType));
+            ValueParser mapParser = new HashMapValueParser(getValueParser(subType.getType(), subType.getSubTypes()));
 
             return mapParser;
         }

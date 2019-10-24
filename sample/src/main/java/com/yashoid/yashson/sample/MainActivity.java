@@ -9,6 +9,7 @@ import com.yashoid.yashson.Yashson;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        classRoomTest();
+        personTest();
+    }
+
+    private void classRoomTest() {
+        try {
+            JSONObject json = ClassRoom.getSampleJson();
+
+            Yashson yashson = new Yashson();
+
+            ClassRoom classRoom = yashson.parse(json, ClassRoom.class);
+
+            Log.d("AAA", classRoom.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void personTest() {
         try {
             Person<Integer> firstPerson = new Person<>();
 

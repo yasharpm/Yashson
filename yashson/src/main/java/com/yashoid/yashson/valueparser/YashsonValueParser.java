@@ -2,6 +2,7 @@ package com.yashoid.yashson.valueparser;
 
 import com.yashoid.yashson.Yashson;
 import com.yashoid.yashson.datareader.DataReader;
+import com.yashoid.yashson.fieldprovider.ParsedType;
 
 import java.io.IOException;
 
@@ -14,9 +15,9 @@ public class YashsonValueParser extends ValueParser {
     private Yashson mYashson;
 
     private Class mType;
-    private Class[] mSubTypes;
+    private ParsedType[] mSubTypes;
 
-    public YashsonValueParser(Yashson yashson, Class type, Class... subTypes) {
+    public YashsonValueParser(Yashson yashson, Class type, ParsedType... subTypes) {
         mYashson = yashson;
 
         mType = type;

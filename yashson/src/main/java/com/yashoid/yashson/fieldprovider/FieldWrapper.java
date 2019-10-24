@@ -7,8 +7,6 @@ import com.yashoid.yashson.valueparser.DoubleValueParser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 
@@ -19,20 +17,11 @@ import java.util.Map;
 public class FieldWrapper {
 
     private Field mField;
-    private Class mType;
-    private Class[] mSubTypes;
+    private ParsedType mType;
 
-    protected FieldWrapper(Field field, Class type, Class... subTypes) {
+    protected FieldWrapper(Field field, ParsedType type) {
         mField = field;
-
-        if (type == null) {
-            mType = mField.getType();
-        }
-        else {
-            mType = type;
-        }
-
-        mSubTypes = subTypes;
+        mType = type;
     }
 
     public String getName() {
@@ -40,39 +29,11 @@ public class FieldWrapper {
     }
 
     public Class getType() {
-        return mType;
+        return mType.getType();
     }
 
-    public Class getSubType() {
-        return getSubType(0);
-    }
-
-    public Class getSubType(int index) {
-        if (mSubTypes.length > 0) {
-            return mSubTypes[index];
-        }
-
-        return (Class) ((ParameterizedType) mField.getGenericType()).getActualTypeArguments()[index];
-    }
-
-    public Class[] getSubTypes() {
-        if (!(mField.getGenericType() instanceof ParameterizedType)) {
-            return new Class[0];
-        }
-
-        if (mSubTypes.length > 0) {
-            return mSubTypes;
-        }
-
-        Type[] subTypes = ((ParameterizedType) mField.getGenericType()).getActualTypeArguments();
-
-        Class[] classes = new Class[subTypes.length];
-
-        for (int i = 0; i < classes.length; i++) {
-            classes[i] = (Class) subTypes[i];
-        }
-
-        return classes;
+    public ParsedType[] getSubTypes() {
+        return mType.getSubTypes();
     }
 
     public void setValue(Object instance, Object value) {

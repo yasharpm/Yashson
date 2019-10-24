@@ -23,6 +23,8 @@ public class JsonReaderDataReader extends DataReader {
 
     private int mDepth;
 
+    private boolean mValueRead = false;
+
     public JsonReaderDataReader(JsonReader reader) {
         super(null);
 
@@ -54,51 +56,74 @@ public class JsonReaderDataReader extends DataReader {
 
     @Override
     public void onReadingFinished() throws IOException {
-        mDepthManager.clearToDepth(mDepth);
+        if (mDepthManager.getDepth() > mDepth) {
+            mDepthManager.clearToDepth(mDepth);
+        }
+        else if (!mValueRead) {
+            mReader.skipValue();
+        }
     }
 
     @Override
     public int readInt() throws IOException {
+        mValueRead = true;
+
         return mReader.nextInt();
     }
 
     @Override
     public long readLong() throws IOException {
+        mValueRead = true;
+
         return mReader.nextLong();
     }
 
     @Override
     public float readFloat() throws IOException {
+        mValueRead = true;
+
         return (float) mReader.nextDouble();
     }
 
     @Override
     public double readDouble() throws IOException {
+        mValueRead = true;
+
         return mReader.nextDouble();
     }
 
     @Override
     public String readString() throws IOException {
+        mValueRead = true;
+
         return mReader.nextString();
     }
 
     @Override
     public byte readByte() throws IOException {
+        mValueRead = true;
+
         return (byte) mReader.nextInt();
     }
 
     @Override
     public char readChar() throws IOException {
+        mValueRead = true;
+
         return mReader.nextString().charAt(0);
     }
 
     @Override
     public boolean readBoolean() throws IOException {
+        mValueRead = true;
+
         return mReader.nextBoolean();
     }
 
     @Override
-    public ListDataReader asListReader() throws IOException {
+    public ListDataReader asListReader() {
+        mValueRead = true;
+
         if (!mIsRoot) {
             mDepthManager.add();
         }
@@ -107,7 +132,9 @@ public class JsonReaderDataReader extends DataReader {
     }
 
     @Override
-    public ObjectDataReader asObjectReader() throws IOException {
+    public ObjectDataReader asObjectReader() {
+        mValueRead = true;
+
         if (!mIsRoot) {
             mDepthManager.add();
         }

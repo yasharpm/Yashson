@@ -3,5 +3,6 @@
 .idea
 local.properties
 gradle.properties
+gradle/
 .DS_Store
 build

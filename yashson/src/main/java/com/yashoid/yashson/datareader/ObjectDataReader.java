@@ -6,10 +6,10 @@ import java.io.IOException;
  * Created by Yashar on 11/15/2017.
  */
 
-public abstract class ObjectDataReader {
+public interface ObjectDataReader {
 
-    abstract public boolean hasNextField() throws IOException;
+    boolean hasNextField() throws IOException;
 
-    abstract public DataReader nextField() throws IOException;
+    DataReader nextField() throws IOException;
 
 }
