@@ -174,7 +174,7 @@ public class Yashson {
     public<T> List<T> parseList(DataReader reader, Class<T> clazz, ParsedType... subTypes) throws IOException {
         ArrayListValueParser valueParser = new ArrayListValueParser(getValueParser(clazz, subTypes));
 
-        return (List<T>) valueParser.parseValue(reader);
+        return applyValueParser(reader, valueParser);
     }
 
     public<T> T parse(JSONObject json, Class<T> clazz, Class... subTypes) throws IOException {
@@ -201,7 +201,13 @@ public class Yashson {
 
     public<T> T parse(DataReader dataReader, Class<T> clazz, ParsedType... subTypes) throws IOException {
         if (Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz)) {
-            return (T) getValueParser(clazz, subTypes).parseValue(dataReader);
+            return applyValueParser(dataReader, getValueParser(clazz, subTypes));
+        }
+
+        ValueParser valueParser = getValueParser(clazz, subTypes);
+
+        if (valueParser != null && !(valueParser instanceof YashsonValueParser)) {
+            return applyValueParser(dataReader, valueParser);
         }
 
         ObjectDataReader objectDataReader = dataReader.asObjectReader();
@@ -210,7 +216,7 @@ public class Yashson {
 
         T object = makeInstance(clazz);
 
-        while (objectDataReader.hasNextField()) {
+        while (objectReaderHasNextField(objectDataReader)) {
             DataReader fieldReader = objectDataReader.nextField();
 
             String parsedFieldName = fieldReader.getFieldName();
@@ -235,9 +241,9 @@ public class Yashson {
                 continue;
             }
 
-            ValueParser valueParser = getValueParser(fieldWrapper, clazz, parsedFieldName, fieldWrapper.getName());
+            valueParser = getValueParser(fieldWrapper, clazz, parsedFieldName, fieldWrapper.getName());
 
-            Object value = valueParser.parseValue(fieldReader);
+            Object value = applyValueParser(fieldReader, valueParser);
 
             fieldReader.onReadingFinished();
 
@@ -325,6 +331,32 @@ public class Yashson {
 
     private ValueParser getValueParser(FieldWrapper fieldWrapper) {
         return getValueParser(fieldWrapper.getType(), fieldWrapper.getSubTypes());
+    }
+
+    private<T> T applyValueParser(DataReader reader, ValueParser valueParser) throws IOException {
+        try {
+            return (T) valueParser.parseValue(reader);
+        } catch (Throwable t) {
+            if (t instanceof IOException) {
+                throw t;
+            }
+            else {
+                throw new ValueParseException(t);
+            }
+        }
+    }
+
+    private boolean objectReaderHasNextField(ObjectDataReader reader) throws IOException {
+        try {
+            return reader.hasNextField();
+        } catch (Throwable t) {
+            if (t instanceof IOException) {
+                throw t;
+            }
+            else {
+                throw new ValueParseException(t);
+            }
+        }
     }
 
     public ValueParser getValueParser(Class type, ParsedType... subTypes) {

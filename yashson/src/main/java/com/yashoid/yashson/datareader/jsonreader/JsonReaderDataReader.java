@@ -50,6 +50,26 @@ public class JsonReaderDataReader extends DataReader {
     }
 
     @Override
+    public int getFieldType() throws IOException {
+        switch (mReader.peek()) {
+            case NULL:
+                return TYPE_NULL;
+            case STRING:
+                return TYPE_STRING;
+            case NUMBER:
+                return TYPE_NUMBER;
+            case BOOLEAN:
+                return TYPE_BOOLEAN;
+            case BEGIN_OBJECT:
+                return TYPE_OBJECT;
+            case BEGIN_ARRAY:
+                return TYPE_LIST;
+        }
+
+        throw new IllegalStateException("Reader is an state which is not at the beginning of a value.");
+    }
+
+    @Override
     public boolean isNull() throws IOException {
         return mReader.peek() == JsonToken.NULL;
     }

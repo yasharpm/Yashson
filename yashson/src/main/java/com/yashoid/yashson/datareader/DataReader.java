@@ -8,6 +8,13 @@ import java.io.IOException;
 
 public abstract class DataReader {
 
+    public static final int TYPE_NULL = 0;
+    public static final int TYPE_NUMBER = 1;
+    public static final int TYPE_STRING = 2;
+    public static final int TYPE_BOOLEAN = 3;
+    public static final int TYPE_LIST = 4;
+    public static final int TYPE_OBJECT = 5;
+
     private String mFieldName;
 
     protected DataReader(String fieldName) {
@@ -17,6 +24,8 @@ public abstract class DataReader {
     public String getFieldName() {
         return mFieldName;
     }
+
+    abstract public int getFieldType() throws IOException;
 
     abstract public boolean isNull() throws IOException;
 
